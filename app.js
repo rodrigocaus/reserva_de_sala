@@ -23,11 +23,12 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ "extended": false }));
 app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
 
 // adicione as duas linhas abaixo
 var router = express.Router();
 app.use('/', router);   // deve vir depois de app.use(bodyParser...
+app.use(express.static(path.join(__dirname, 'public')));
+
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -55,25 +56,31 @@ module.exports = app;
 function checkAuth(req, res) {
   cookies = req.cookies;
   if (!cookies || !cookies.userAuth) return 'unauthorized';
-  cauth = cookies.userAuth;
-  var content = JSON.parse(cauth);
+  var content = JSON.parse(cookies.userAuth);
+  // console cookie info
   console.log(JSON.stringify(content));
+
   var key = content.key;
-  var role = content.role;
-  if (key == 'secret') return role
+  var user = {"matricula": content.matricula, "admin": content.admin}
+  if (key == 'secret') return user;
   return 'unauthorized';
 }
 
 // index.html
 router.route('/')
   .get(function (req, res) {  // GET
-    var path = 'index.html';
     res.header('Cache-Control', 'no-cache');
-    res.sendFile(path, { "root": "./" });
+    if ( checkAuth(req, res) == 'unauthorized' ) {
+      res.sendFile('public/login.html', { "root": "./" });
+    }
+    else {
+      res.sendFile('public/index.html', { "root": "./" });
+    }
+    
   }
   );
 
-router.route('/alunos')   // operacoes sobre todos os alunos
+router.route('/reservas')   // operacoes sobre todos os alunos
   .get(function (req, res) {  // GET
     
   }
@@ -85,7 +92,7 @@ router.route('/alunos')   // operacoes sobre todos os alunos
 
 
 
-router.route('/alunos/:ra')   // operacoes sobre um aluno (RA)
+router.route('/reservas/:id')   // operacoes sobre um aluno (RA)
   .get(function (req, res) {   // GET
     
   }
@@ -100,17 +107,47 @@ router.route('/alunos/:ra')   // operacoes sobre um aluno (RA)
   );
 
 
-router.route('/authentication')   // autenticação
-  .get(function (req, res) {  // GET
-    
+router.route('/login')   // autenticação
+  .get(function (req, res) {  //Exibe pagina de login
+    res.header('Cache-Control', 'no-cache');
+    res.sendFile('public/login.html', { "root": "./" });
   }
   )
-  .post(function (req, res) {
+  .post(function (req, res) { //Login
+    // TODO: Pegar do mongo
+    if (req.body.matricula == '123456' && req.body.senha == 'foo') {
+      data = {"matricula": "123456", "admin": false };
+
+      cookieContent = {"key": "secret", "matricula": data.matricula, "admin": data.admin};
+      // Cookie expira em 10 minutos
+      res.cookie('userAuth', JSON.stringify(cookieContent), {'maxAge': 10*60*1000});
+      res.status(200).send("Login efetuado");
+    }
+    else {
+      res.status(401).send("Falha no login");
+    }
     
   }
   )
   .delete(function (req, res) {
-    
+    if(checkAuth(req, res) != 'unauthorized') {
+      res.clearCookie('userAuth');
+      res.status(200).send('Logout efetuado');
+    }
+    else {
+      res.status(401).send('Nao autorizado');
+      return;
+    }
   }
   );
 
+router.route('/cadastro')
+  .get(function (req, res) {
+    res.header('Cache-Control', 'no-cache');
+    res.sendFile('public/cadastro.html', { "root": "./" });
+  }
+  )
+  .post(function (req, res) {
+
+  }
+  );
