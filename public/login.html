@@ -1,0 +1,44 @@
+<html>
+
+<head>
+  <title>Reserva de Sala</title>
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.min.css">
+   <!-- Angular.js Libraries -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-animate.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-aria.min.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-messages.min.js"></script> 
+  <!-- Angular Material Library -->
+  <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
+</head>
+
+<body ng-app="reservasApp" ng-controller="myCtrl">
+
+	<div class="forms">
+		<h2>Login</h2>
+		
+		<div class="input">
+			<md-input-container md-no-float class="md-block">
+				<input ng-model="user.matricula" type="text" placeholder="Matricula">
+			</md-input-container>
+			
+			<md-input-container md-no-float class="md-block">
+				<input ng-model="user.senha" type="password" placeholder="Senha">
+			</md-input-container>
+		</div>
+
+		
+		<md-button class="md-raised md-primary" ng-click="fazLogin()">&nbsp Entrar &nbsp</md-button>
+		<md-button class="md-raised md-primary" ng-click="popUp()">&nbsp Não tenho cadastro &nbsp</md-button>
+		
+
+		
+	</div>
+ 
+  <!-- Your application bootstrap  -->
+  <script src="javascripts/angular-module.js"></script>
+</body>
+
+</html>
