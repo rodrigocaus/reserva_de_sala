@@ -5,12 +5,8 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
 // adicione "ponteiro" para o MongoDB
-var mongoOp = require('./models/mongo_reservas');
-var mongoOp2 = require('./models/mongo_usuarios');
-
-// comente as duas linhas abaixo
-// var index = require('./routes/index');
-// var users = require('./routes/users');
+var mongoReservas = require('./models/mongo_reservas');
+var mongoUsuarios = require('./models/mongo_usuarios');
 
 var app = express();
 
@@ -61,7 +57,7 @@ function checkAuth(req, res) {
   console.log(JSON.stringify(content));
 
   var key = content.key;
-  var user = {"matricula": content.matricula, "admin": content.admin}
+  var user = { "matricula": content.matricula, "admin": content.admin }
   if (key == 'secret') return user;
   return 'unauthorized';
 }
@@ -70,19 +66,19 @@ function checkAuth(req, res) {
 router.route('/')
   .get(function (req, res) {  // GET
     res.header('Cache-Control', 'no-cache');
-    if ( checkAuth(req, res) == 'unauthorized' ) {
+    if (checkAuth(req, res) == 'unauthorized') {
       res.sendFile('public/login.html', { "root": "./" });
     }
     else {
       res.sendFile('public/index.html', { "root": "./" });
     }
-    
+
   }
   );
 
 router.route('/reservas')   // operacoes sobre todos os alunos
   .get(function (req, res) {  // GET
-    
+
   }
   )
   .post(function (req, res) {   // POST (cria)
@@ -94,15 +90,15 @@ router.route('/reservas')   // operacoes sobre todos os alunos
 
 router.route('/reservas/:id')   // operacoes sobre um aluno (RA)
   .get(function (req, res) {   // GET
-    
+
   }
   )
   .put(function (req, res) {   // PUT (altera)
-    
+
   }
   )
   .delete(function (req, res) {   // DELETE (remove)
-    
+
   }
   );
 
@@ -113,24 +109,47 @@ router.route('/login')   // autenticação
     res.sendFile('public/login.html', { "root": "./" });
   }
   )
-  .post(function (req, res) { //Login
+  .post(function (req, res) { // Login
     // TODO: Pegar do mongo
-    if (req.body.matricula == '123456' && req.body.senha == 'foo') {
-      data = {"matricula": "123456", "admin": false };
+    var query = {"matricula": req.body.matricula, "senha": req.body.senha};
+    mongoUsuarios.findOne(query, function(erro, data) {
+      if (erro) res.status(500).send("Falha no servidor");
+      else if (data == null) res.status(401).send("Falha no login");
+      else {
+        cookieContent = { "key": "secret", "matricula": data.matricula, "admin": data.admin };
+        // Cookie expira em 10 minutos
+        res.cookie('userAuth', JSON.stringify(cookieContent), { 'maxAge': 10 * 60 * 1000 });
+        res.status(200).send("Login efetuado");
+      }
 
-      cookieContent = {"key": "secret", "matricula": data.matricula, "admin": data.admin};
-      // Cookie expira em 10 minutos
-      res.cookie('userAuth', JSON.stringify(cookieContent), {'maxAge': 10*60*1000});
-      res.status(200).send("Login efetuado");
-    }
-    else {
-      res.status(401).send("Falha no login");
-    }
-    
+    });
+  }
+  )
+  .put(function (req, res) { // Cadastro
+    var query = {"matricula": req.body.matricula};
+    mongoUsuarios.findOne(query, function(erro, data) {
+      if (erro) res.status(500).send("Falha no servidor");
+      else if (data == null) {
+        // Usuario novo
+        var novoUsuario = new mongoUsuarios();
+        novoUsuario.nome = req.body.nome;
+        novoUsuario.matricula = req.body.matricula;
+        novoUsuario.senha = req.body.senha;
+        novoUsuario.admin = false;
+        novoUsuario.save(function (erro) {
+          if(erro) res.status(500).send("Erro ao registrar usuario");
+          else res.status(200).send("Usuario inserido");
+        });
+      }
+      else {
+        res.status(409).send("Usuario ja cadastrado");
+      }
+
+    });
   }
   )
   .delete(function (req, res) {
-    if(checkAuth(req, res) != 'unauthorized') {
+    if (checkAuth(req, res) != 'unauthorized') {
       res.clearCookie('userAuth');
       res.status(200).send('Logout efetuado');
     }
@@ -138,16 +157,5 @@ router.route('/login')   // autenticação
       res.status(401).send('Nao autorizado');
       return;
     }
-  }
-  );
-
-router.route('/cadastro')
-  .get(function (req, res) {
-    res.header('Cache-Control', 'no-cache');
-    res.sendFile('public/cadastro.html', { "root": "./" });
-  }
-  )
-  .post(function (req, res) {
-
   }
   );

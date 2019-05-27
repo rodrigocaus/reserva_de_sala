@@ -26,3 +26,9 @@ a {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
   text-transform: capitalize !important;
 }
+
+.erroForm {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
+  font-size: 13px;
+  color: red;
+}
