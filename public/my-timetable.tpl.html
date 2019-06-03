@@ -1,0 +1,16 @@
+<table class="my-table">
+    <colgroup>
+      <col span="1" width="4%">
+      <col data-ng-repeat="i in range(0, 8, 1)" span="1" width="12%">
+    </colgroup>
+    <thead>
+      <th></th>
+      <th data-ng-repeat="day in days">{{day}}</th>
+    </thead>
+    <tbody>
+      <tr data-ng-repeat="i in range(8, 22, 1)">
+        <th>{{i + ':00'}}</th>
+        <td data-ng-repeat="j in range(0, 5, 1)"  data-ng-click="toggle(j, i)">{{cell[i][j]}}</td>
+      </tr>
+    </tbody>
+</table>
