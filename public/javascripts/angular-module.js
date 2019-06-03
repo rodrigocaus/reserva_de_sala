@@ -136,6 +136,7 @@ ng_module.controller('indexCtrl', function($scope, $http) {
 		let datastr = $scope.myDate.getDate()+'/'+($scope.myDate.getMonth()+1)+'/'+$scope.myDate.getFullYear();
 		$scope.resposta = datastr;
 	}
+
 });
 
 ng_module.config(function ($mdDateLocaleProvider) {
@@ -146,3 +147,39 @@ ng_module.config(function ($mdDateLocaleProvider) {
 
 });
 
+ng_module.directive('myTable', function () {
+    return {
+	  restrict: 'A',
+      templateUrl: 'my-timetable.tpl.html',
+      link: function (scope, element, attributes) {
+		var _days = ['FE01', 'FE02', 'FE03', 'FE11', 'FE12', 'FE13'];
+		var _cell = new Array(24);
+		for(let i = 0 ; i < 24 ; i++){
+			_cell[i] = new Array(_days.length).fill('');
+		}
+
+        function _loop(begin, end, step) {
+          var array = [];
+          
+          for (var i = begin; i <= end; i += step) {
+            array.push(i);
+          }
+          return array;
+        }
+        
+        function _toggle(day, hour) {
+			//alert("O horário é " + hour + ":00 e a sala é " + _days[day]);
+			_cell[hour][day] = "Oi";
+			// TODO Chamar a função que exibe mais informações da reserva e possibilitita a reserva/alteração/cancelamento
+        }
+        
+        function _init() {
+          scope.range = _loop;
+          scope.toggle = _toggle;
+		  scope.days = _days;
+		  scope.cell = _cell;
+        }
+        _init();
+      }
+    };
+});
