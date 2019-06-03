@@ -32,3 +32,36 @@ a {
   font-size: 13px;
   color: red;
 }
+
+.my-table{
+  width: 99%;
+  height: 70%;
+  border-spacing: 0;
+  border-collapse: collapse;   
+  
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+.my-table th {
+  font-size: 0.8em;
+  color: #808080;
+  cursor: default;
+}
+
+.my-table td {
+  border: 1px solid black;
+  background: rgb(235, 235, 235);
+  cursor: pointer;
+}
+
+.my-table td:hover {
+  background: white;
+}
+
+.my-table .selected {
+  background: rgb(0, 102, 102);
+}
