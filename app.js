@@ -110,7 +110,6 @@ router.route('/login')   // autenticação
   }
   )
   .post(function (req, res) { // Login
-    // TODO: Pegar do mongo
     var query = {"matricula": req.body.matricula, "senha": req.body.senha};
     mongoUsuarios.findOne(query, function(erro, data) {
       if (erro) res.status(500).send("Falha no servidor");

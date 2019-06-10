@@ -176,8 +176,8 @@ ng_module.directive('myTable', function () {
         function _init() {
           scope.range = _loop;
           scope.toggle = _toggle;
-		  scope.days = _days;
-		  scope.cell = _cell;
+		  		scope.days = _days;
+		  		scope.cell = _cell;
         }
         _init();
       }
