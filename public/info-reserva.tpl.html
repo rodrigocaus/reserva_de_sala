@@ -1,0 +1,39 @@
+<md-dialog aria-label="Reserva" style="width:60%">
+    <form ng-cloak>
+      <md-toolbar style="background-color: rgb(0, 102, 102)">
+        <div class="md-toolbar-tools">
+          <h2>Reserva de Sala</h2>
+          <span flex></span>
+          <md-button class="md-icon-button" ng-click="cancel()">
+            <md-icon md-svg-src="images/close.svg" aria-label="Close dialog"></md-icon>
+          </md-button>
+        </div>
+      </md-toolbar>
+  
+      <md-dialog-content>
+        <div>
+			<md-input-container md-no-float class="md-block">
+				<input ng-model="evento" type="text" placeholder="Nome do evento" required>
+			</md-input-container>
+
+			<md-input-container md-no-float class="md-block">
+				<input ng-model="descricao" type="text" placeholder="Descrição do evento" required>
+            </md-input-container>
+            
+            <md-input-container class="md-block" flex-gt-sm>
+                <label>Horário de término</label>
+                <md-select ng-model="fim">
+                    <md-option ng-repeat="hora in range(inicio+1,23,1)" value="{{hora}}">{{hora + ':00'}}</md-option>
+                </md-select>
+            </md-input-container>
+		</div>
+      </md-dialog-content>
+
+      <p class="erroForm">{{resultado}}</p>
+  
+      <md-dialog-actions layout="row">
+        <span flex></span>
+        <md-button ng-click="resposta('reservar')"> Reservar </md-button>
+      </md-dialog-actions>
+    </form>
+  </md-dialog>

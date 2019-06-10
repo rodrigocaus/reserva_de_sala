@@ -1,0 +1,16 @@
+<table class="my-table">
+    <colgroup>
+      <col span="1" width="4%">
+      <col ng-repeat="i in range(0, 8, 1)" span="1" width="12%">
+    </colgroup>
+    <thead>
+      <th></th>
+      <th ng-repeat="sala in salas">{{sala}}</th>
+    </thead>
+    <tbody>
+      <tr ng-repeat="i in range(8, 22, 1)">
+        <th>{{i + ':00'}}</th>
+        <td ng-repeat="j in range(0, 5, 1)"  ng-click="mostraFormReserva(j , i, $event)">{{celula[i][j]}}</td>
+      </tr>
+    </tbody>
+</table>

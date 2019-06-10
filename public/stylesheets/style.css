@@ -25,6 +25,7 @@ a {
   background-color: rgb(0, 102, 102) !important;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
   text-transform: capitalize !important;
+  color: white !important;
 }
 
 .erroForm {
