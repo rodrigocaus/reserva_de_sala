@@ -78,7 +78,22 @@ router.route('/')
 
 router.route('/reservas')   // operacoes sobre todas as reservas
 	.get(function (req, res) {  // GET
-		res.status(200).send("Teste");
+		//Verifica autenticacao
+		var usuarioSolicitante = checkAuth(req, res);
+		if (usuarioSolicitante == 'unauthorized') {
+			res.status(401).send("Nao autorizado");
+			return;
+		}
+		var query = { "dia": req.query.dia };
+
+		mongoReservas.find(query, function (erro, data) {
+			if (erro) res.status(500).send("Falha no servidor");
+			else {
+				res.status(200).send(data);
+				console.log(data);
+			}
+		});
+
 	}
 	)
 	.post(function (req, res) {   // POST (cria)

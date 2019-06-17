@@ -131,7 +131,7 @@ ng_module.controller('authenticationCtrl', function ($scope, $http, $window) {
 
 });
 
-ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog , $window) {
+ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 
 	$scope.resposta = '';
 
@@ -149,7 +149,9 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog , $window) 
 
 	$scope.foo = function () {
 		let diastr = $scope.myDate.getDate() + '/' + ($scope.myDate.getMonth() + 1) + '/' + $scope.myDate.getFullYear();
-		$scope.resposta = diastr;
+		$scope.resposta = '';
+		$scope.pegaReservasDia(diastr);
+		//$scope.resposta = JSON.stringify($scope.listaDeReservas);
 	}
 
 	$scope.toggle = function (sala, hora) {
@@ -196,7 +198,6 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog , $window) 
 		})
 			.then(function (answer) {
 				var data = JSON.stringify($scope.reserva);
-				$scope.resposta = data; //TODO: Tirar isso quando estiver pronto e testado
 				var url = '/reservas';
 
 				var request = $http({
@@ -214,12 +215,12 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog , $window) 
 						if (response.status == 401) {
 							$scope.resposta = "Nao autorizado";
 							$window.location.href = '/login.html';
-						} 
-						else if(response.status == 409){
+						}
+						else if (response.status == 409) {
 							$scope.resposta = "Horario já reservado";
 						}
 						else {
-							$scope.resultado = "Falha de acesso";
+							$scope.resposta = "Falha de acesso";
 						}
 					});
 
@@ -277,12 +278,13 @@ ng_module.config(function ($mdDateLocaleProvider) {
 
 });
 
-ng_module.directive('myTable', function () {
+ng_module.directive('myTable', function ($window, $http) {
 	return {
 		restrict: 'A',
 		templateUrl: 'tabela-reservas.tpl.html',
 		link: function (scope, element, attributes) {
 			var _salas = ['FE01', 'FE02', 'FE03', 'FE11', 'FE12', 'FE13'];
+
 			var _celula = new Array(24);
 			for (let i = 0; i < 24; i++) {
 				_celula[i] = new Array(_salas.length).fill('');
@@ -296,10 +298,44 @@ ng_module.directive('myTable', function () {
 				}
 				return array;
 			}
+
+			function _pegaReservasDia(diaStr) {
+				var url = '/reservas';
+
+				var config = {
+					params: {
+						dia : diaStr
+					}
+				};
+
+				var request = $http.get(url, config);
+
+				request.then(function successCallback(response) {
+					//console.log(response.data);
+					scope.listaDeReservas = response.data;
+				},
+					function errorCallback(response) {
+						console.log(response.data);
+						if (response.status == 401) {
+							scope.resposta = "Não autorizado";
+							$window.location.href = '/login.html';
+						}
+						else {
+							scope.resultado = "Falha de acesso";
+						}
+						return;
+					});
+			}
+
+
 			function _init() {
 				scope.range = _range;
 				scope.salas = _salas;
 				scope.celula = _celula;
+				scope.pegaReservasDia = _pegaReservasDia;
+				let diastr = scope.myDate.getDate() + '/' + (scope.myDate.getMonth() + 1) + '/' + scope.myDate.getFullYear();
+				_pegaReservasDia(diastr);
+
 			}
 			_init();
 		}
