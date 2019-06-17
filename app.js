@@ -54,7 +54,7 @@ function checkAuth(req, res) {
 	if (!cookies || !cookies.userAuth) return 'unauthorized';
 	var content = JSON.parse(cookies.userAuth);
 	// console cookie info
-	console.log(JSON.stringify(content));
+	//console.log(JSON.stringify(content));
 
 	var key = content.key;
 	var user = { "matricula": content.matricula, "admin": content.admin }
@@ -78,11 +78,53 @@ router.route('/')
 
 router.route('/reservas')   // operacoes sobre todas as reservas
 	.get(function (req, res) {  // GET
-		
+		res.status(200).send("Teste");
 	}
 	)
 	.post(function (req, res) {   // POST (cria)
 
+		//Verifica autenticacao
+		var usuarioSolicitante = checkAuth(req, res);
+		if (usuarioSolicitante == 'unauthorized') {
+			res.status(401).send("Nao autorizado");
+			return;
+		}
+
+		var query = { "dia": req.body.dia, "sala": req.body.sala };
+
+		var horariosSelecionados = [];
+		for (let i = req.body.inicio; i < req.body.fim; i++) {
+			horariosSelecionados.push(i);
+		}
+
+		mongoReservas.find(query, function (erro, data) {
+			if (erro) res.status(500).send("Falha no servidor");
+			else {
+				//Verifica conflito
+				for (var reserva = 0; reserva < data.length; reserva++) {
+					for (var hora = 0; hora < data[reserva].horario.length; hora++) {
+						if (horariosSelecionados.includes(data[reserva].horario[hora]) === true) {
+							res.status(409).send("Horario ja reservado");
+							return;
+						}
+					}
+				}
+
+				//Adiciona a reserva se nao deu conflito de horario
+				var novaReserva = new mongoReservas();
+				novaReserva.sala = req.body.sala;
+				novaReserva.autor = usuarioSolicitante.matricula;
+				novaReserva.dia = req.body.dia;
+				novaReserva.evento = req.body.evento;
+				novaReserva.descricao = req.body.descricao;
+				novaReserva.horario = [...horariosSelecionados];
+				novaReserva.save(function (erro) {
+					if (erro) res.status(500).send("Erro ao efetuar reserva");
+					else res.status(200).send("Reserva inserida");
+				});
+
+			}
+		});
 	}
 	);
 
