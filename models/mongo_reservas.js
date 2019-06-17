@@ -4,7 +4,7 @@ var Schema = mongoose.Schema;
 var reservaSchema = new Schema({
     "sala": String,
 	"autor": String,
-	"data": String,
+	"dia": String,
 	"evento": String,
 	"descricao": String,
 	"horario": [Number]
