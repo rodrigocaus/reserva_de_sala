@@ -141,15 +141,15 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog , $window) 
 		evento: '',
 		descricao: '',
 		autor: '',
-		data: '',
+		dia: '',
 		sala: '',
 		inicio: 0,
 		fim: 0
 	};
 
 	$scope.foo = function () {
-		let datastr = $scope.myDate.getDate() + '/' + ($scope.myDate.getMonth() + 1) + '/' + $scope.myDate.getFullYear();
-		$scope.resposta = datastr;
+		let diastr = $scope.myDate.getDate() + '/' + ($scope.myDate.getMonth() + 1) + '/' + $scope.myDate.getFullYear();
+		$scope.resposta = diastr;
 	}
 
 	$scope.toggle = function (sala, hora) {
@@ -185,7 +185,7 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog , $window) 
 	$scope.mostraFormReserva = function (sala, hora, ev) {
 		$scope.reserva.inicio = hora;
 		$scope.reserva.sala = $scope.salas[sala];
-		$scope.reserva.data = $scope.myDate.getDate() + '/' + ($scope.myDate.getMonth() + 1) + '/' + $scope.myDate.getFullYear();
+		$scope.reserva.dia = $scope.myDate.getDate() + '/' + ($scope.myDate.getMonth() + 1) + '/' + $scope.myDate.getFullYear();
 		$mdDialog.show({
 			controller: DialogController,
 			templateUrl: 'info-reserva.tpl.html',
@@ -212,15 +212,17 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog , $window) 
 					function errorCallback(response) {
 						console.log(response.data);
 						if (response.status == 401) {
-							$scope.resultado = "Matricula ou senha incorretos";
+							$scope.resposta = "Nao autorizado";
+							$window.location.href = '/login.html';
+						} 
+						else if(response.status == 409){
+							$scope.resposta = "Horario já reservado";
 						}
 						else {
 							$scope.resultado = "Falha de acesso";
 						}
-						$scope.user.matricula = "";
-						$scope.user.senha = "";
 					});
-					
+
 			}, function () {
 				$scope.resposta = '';
 			});
