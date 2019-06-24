@@ -4,7 +4,7 @@
   <title>Reserva de Sala</title>
   <link rel="stylesheet" href="/stylesheets/style.css">
   <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.min.css">
-    <!-- Angular.js Libraries -->
+  <!-- Angular.js Libraries -->
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-animate.min.js"></script>
   <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-aria.min.js"></script>
@@ -13,42 +13,40 @@
   <script src="https://ajax.googleapis.com/ajax/libs/angular_material/1.1.12/angular-material.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.10.2/moment.min.js"></script>
   <!-- Teste do table-->
-  <script data-require="angular-route@*" data-semver="1.2.12" src="http://code.angularjs.org/1.2.12/angular-route.js"></script>
-  <script data-require="angular-touch@*" data-semver="1.2.12" src="http://code.angularjs.org/1.2.12/angular-touch.js"></script>
+  <script data-require="angular-route@*" data-semver="1.2.12"
+    src="http://code.angularjs.org/1.2.12/angular-route.js"></script>
+  <script data-require="angular-touch@*" data-semver="1.2.12"
+    src="http://code.angularjs.org/1.2.12/angular-touch.js"></script>
   <!-- Modulo angular -->
   <script src="javascripts/angular-module.js"></script>
-  
+
 </head>
-  
+
 
 <body ng-app="reservasApp" ng-controller="indexCtrl">
-  
+
   <div>
     <header>
       <div style="display: inline-block; width: 49%;">
-          <h2 style="padding: 8px 0px 0px 24px;">Reserva de salas</h2>
+        <h2 style="padding: 8px 0px 0px 24px;">Reserva de salas</h2>
       </div>
-      <div ng-app="reservasApp" ng-controller="authenticationCtrl" style="text-align: right; display: inline-block; width: 50%;">
-          <md-button class="md-raised md-primary" ng-click="fazLogout()">&nbsp Sair &nbsp</md-button>
+      <div ng-app="reservasApp" style="text-align: right; display: inline-block; width: 50%;">
+        <md-datepicker ng-model="myDate" readonly="readonly" onkeydown="return false"></md-datepicker>
+        &nbsp;&nbsp;&nbsp;
+        <md-button class="md-raised md-primary" ng-click="confirmaDia()">&nbsp Ir &nbsp</md-button>
+        <md-button class="md-raised md-primary" ng-controller="authenticationCtrl" ng-click="fazLogout()">&nbsp Sair &nbsp</md-button>
       </div>
     </header>
     <md-divider></md-divider>
   </div>
-  
 
-  <div style="padding: 8px 0px 0px 24px;">
-    <h4>Selecione a data:</h4>
-    <md-datepicker ng-model="myDate" readonly="readonly" onkeydown="return false"></md-datepicker>
-    &nbsp;&nbsp;&nbsp;
-    <md-button class="md-raised md-primary" ng-click="foo()">&nbsp Ir &nbsp</md-button>
+  <div style="padding: 0px 24px 8px 24px;">
+    <p>{{resposta}}</p>
   </div>
-
-  <p style="padding: 8px 0px 0px 24px;">{{resposta}}</p>
-  <md-divider></md-divider>
 
   <div my-table=""></div>
 
-  
+
 </body>
 
 </html>

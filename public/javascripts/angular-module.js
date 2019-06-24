@@ -147,7 +147,7 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 		fim: 0
 	};
 
-	$scope.foo = function () {
+	$scope.confirmaDia = function () {
 		let diastr = $scope.myDate.getDate() + '/' + ($scope.myDate.getMonth() + 1) + '/' + $scope.myDate.getFullYear();
 		$scope.resposta = '';
 		$scope.pegaReservasDia(diastr);
@@ -224,6 +224,11 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 
 			}, function () {
 				$scope.resposta = '';
+				$scope.reserva.evento = '';
+				$scope.reserva.descricao = '';
+				$scope.reserva.inicio = 0;
+				$scope.reserva.fim = 0;
+				$scope.reserva.autor = '';
 			});
 	};
 
@@ -387,6 +392,7 @@ ng_module.directive('myTable', function ($window, $http) {
 						let idxSala = _salas.indexOf(r.sala);
 						for (let h = 0; h < r.horario.length; h++) {
 							_celula[r.horario[h]][idxSala] = r.evento;
+
 						}
 					}
 				},

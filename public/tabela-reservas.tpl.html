@@ -10,7 +10,7 @@
     <tbody>
       <tr ng-repeat="i in range(8, 22, 1)">
         <th>{{i + ':00'}}</th>
-        <td ng-repeat="j in range(0, 5, 1)"  ng-click="toggle(j , i, $event)">{{celula[i][j]}}</td>
+        <td ng-repeat="j in range(0, 5, 1)"  ng-click="toggle(j , i, $event)" ng-class="{selected: celula[i][j]}">{{celula[i][j]}}</td>
       </tr>
     </tbody>
 </table>
