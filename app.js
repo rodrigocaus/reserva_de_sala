@@ -90,7 +90,7 @@ router.route('/reservas')   // operacoes sobre todas as reservas
 			if (erro) res.status(500).send("Falha no servidor");
 			else {
 				res.status(200).send(data);
-				console.log(data);
+				//console.log(data);
 			}
 		});
 
@@ -146,16 +146,31 @@ router.route('/reservas')   // operacoes sobre todas as reservas
 
 
 router.route('/reservas/:id')   // operacoes sobre uma reserva (ID)
-	.get(function (req, res) {   // GET
-
-	}
-	)
 	.put(function (req, res) {   // PUT (altera reserva)
 
 	}
 	)
 	.delete(function (req, res) {   // DELETE (remove reserva)
 
+		//Verifica autenticacao
+		var usuarioSolicitante = checkAuth(req, res);
+		if (usuarioSolicitante == 'unauthorized') {
+			res.status(401).send("Nao autorizado");
+			return;
+		}
+
+		var query = {"_id": req.params.id};
+		mongoReservas.findOne(query, function(erro, data) {
+			if (erro) res.status(500).send("Falha no servidor");
+			else if (data == null) res.status(404).send("Nao encontrado");
+			else if (data.autor !== usuarioSolicitante.matricula && usuarioSolicitante.admin == false) res.status(403).send("Nao autorizado");
+			else {
+				mongoReservas.deleteOne(query, function(erro){
+					if (erro) res.status(500).send("Falha no servidor");
+					else res.status(200).send("Removido com sucesso");
+				});
+			}
+		});
 	}
 	);
 

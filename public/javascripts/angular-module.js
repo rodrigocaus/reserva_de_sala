@@ -194,6 +194,34 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 		})
 			.then(function () {
 
+				var url = '/reservas/' + reservaClicada._id;
+
+				var request = $http({
+					"method": "delete",
+					"url": url,
+				});
+				request.then(function successCallback(response) {
+					console.log(response.data);
+					$scope.resultado = "Reserva cancelada com sucesso!";
+					$window.location.reload(true);
+				},
+					function errorCallback(response) {
+						console.log(response.data);
+						if (response.status == 401) {
+							$scope.resposta = "Não autorizado";
+							$window.location.href = '/login.html';
+						}
+						else if (response.status == 403) {
+							$scope.resposta = "Não é permitido cancelar reservas de terceiros";
+						}
+						else if (response.status == 404) {
+							$scope.resposta = "Reserva não encontrada";
+						}
+						else {
+							$scope.resposta = "Falha de acesso";
+						}
+					});
+
 			}, function () {
 				$scope.resposta = '';
 			});
@@ -228,11 +256,11 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 					function errorCallback(response) {
 						console.log(response.data);
 						if (response.status == 401) {
-							$scope.resposta = "Nao autorizado";
+							$scope.resposta = "Não autorizado";
 							$window.location.href = '/login.html';
 						}
 						else if (response.status == 409) {
-							$scope.resposta = "Horario já reservado";
+							$scope.resposta = "Horário já reservado";
 						}
 						else {
 							$scope.resposta = "Falha de acesso";
