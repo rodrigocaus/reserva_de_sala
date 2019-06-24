@@ -153,35 +153,50 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 		$scope.pegaReservasDia(diastr);
 		//$scope.resposta = JSON.stringify($scope.listaDeReservas);
 	}
-
-	$scope.toggle = function (sala, hora) {
-		if ($scope.celula[hora][sala] == '') {
-			$scope.celula[hora][sala] = "Reservado";
-			$scope.resposta = sala + ' ' + hora;
+	//!($scope.cadastro.matricula) || $scope.cadastro.matricula.trim().length === 0 
+	$scope.toggle = function (sala, hora, ev) {
+		if (!($scope.celula[hora][sala]) || $scope.celula[hora][sala].trim().length === 0) {
+			$scope.mostraFormReserva(sala, hora, ev);
 		}
 		else {
-			$scope.celula[hora][sala] = '';
-			$scope.resposta = '';
+			$scope.mostraInfoReserva(sala, hora, ev);
 		}
 		// TODO Chamar a função que exibe mais informações da reserva e possibilitita a reserva/alteração/cancelamento
 	}
 
 	$scope.mostraInfoReserva = function (sala, hora, ev) {
-		// Appending dialog to document.body to cover sidenav in docs app
-		var confirm = $mdDialog.confirm()
-			.clickOutsideToClose(true)
-			.title('Voce clicou nessa sala?')
-			.textContent("Sala: " + sala + " e hora: " + hora)
-			.ariaLabel('Lucky day')
-			.targetEvent(ev)
-			.ok('Tá certo mesmo')
-			.cancel('ERRRROOUU!!!');
 
-		$mdDialog.show(confirm).then(function () {
-			$scope.resposta = 'Voce clicou na sala certa.';
-		}, function () {
-			$scope.resposta = 'Voce errou a sala.';
-		});
+		var reservaClicada;
+		for (let r of $scope.listaDeReservas) {
+			if (r.sala == $scope.salas[sala]) {
+				for (let h = 0; h < r.horario.length; h++) {
+					if (r.horario[h] == hora) {
+						reservaClicada = JSON.parse(JSON.stringify(r));
+						break;
+					}
+				}
+			}
+		}
+
+		$scope.reserva.evento = reservaClicada.evento;
+		$scope.reserva.descricao = reservaClicada.descricao;
+		$scope.reserva.inicio = reservaClicada.horario[0];
+		$scope.reserva.fim = reservaClicada.horario[reservaClicada.horario.length - 1] + 1;
+		$scope.reserva.autor = reservaClicada.autor;
+
+		$mdDialog.show({
+			controller: InfoController,
+			templateUrl: 'info-reserva.tpl.html',
+			parent: angular.element(document.body),
+			targetEvent: ev,
+			clickOutsideToClose: true,
+			fullscreen: $scope.customFullscreen // Only for -xs, -sm breakpoints.
+		})
+			.then(function () {
+
+			}, function () {
+				$scope.resposta = '';
+			});
 	};
 
 	$scope.mostraFormReserva = function (sala, hora, ev) {
@@ -189,14 +204,14 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 		$scope.reserva.sala = $scope.salas[sala];
 		$scope.reserva.dia = $scope.myDate.getDate() + '/' + ($scope.myDate.getMonth() + 1) + '/' + $scope.myDate.getFullYear();
 		$mdDialog.show({
-			controller: DialogController,
-			templateUrl: 'info-reserva.tpl.html',
+			controller: FormController,
+			templateUrl: 'form-reserva.tpl.html',
 			parent: angular.element(document.body),
 			targetEvent: ev,
 			clickOutsideToClose: true,
 			fullscreen: $scope.customFullscreen // Only for -xs, -sm breakpoints.
 		})
-			.then(function (answer) {
+			.then(function () {
 				var data = JSON.stringify($scope.reserva);
 				var url = '/reservas';
 
@@ -229,7 +244,7 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 			});
 	};
 
-	function DialogController(scope, $mdDialog) {
+	function FormController(scope, $mdDialog) {
 		scope.evento = '';
 		scope.descricao = '';
 		scope.inicio = $scope.reserva.inicio;
@@ -244,7 +259,7 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 			$mdDialog.cancel();
 		};
 
-		scope.resposta = function (resposta) {
+		scope.reservar = function () {
 			if (!(scope.evento) || scope.evento.trim().length === 0 ||
 				!(scope.descricao) || scope.descricao.trim().length === 0) {
 				scope.evento = "";
@@ -256,7 +271,7 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 				$scope.reserva.descricao = scope.descricao;
 				$scope.reserva.fim = scope.fim;
 				scope.resultado = "";
-				$mdDialog.hide(resposta);
+				$mdDialog.hide();
 			}
 		};
 
@@ -266,6 +281,26 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 				array.push(i);
 			}
 			return array;
+		};
+	}
+
+	function InfoController(scope, $mdDialog) {
+		scope.evento = $scope.reserva.evento;
+		scope.descricao = $scope.reserva.descricao;
+		scope.inicio = $scope.reserva.inicio;
+		scope.fim = $scope.reserva.fim;
+		scope.autor = $scope.reserva.autor;
+
+		scope.hide = function () {
+			$mdDialog.hide();
+		};
+
+		scope.cancel = function () {
+			$mdDialog.cancel();
+		};
+
+		scope.deletar = function () {
+			$mdDialog.hide();
 		};
 	}
 });
@@ -304,15 +339,28 @@ ng_module.directive('myTable', function ($window, $http) {
 
 				var config = {
 					params: {
-						dia : diaStr
+						dia: diaStr
 					}
 				};
 
 				var request = $http.get(url, config);
 
 				request.then(function successCallback(response) {
-					//console.log(response.data);
-					scope.listaDeReservas = response.data;
+					scope.listaDeReservas = [...response.data];
+					//Limpa as celulas
+					for (let i = 0; i < 24; i++) {
+						for (let j = 0; j < _salas.length; j++) {
+							_celula[i][j] = "";
+						}
+					}
+
+					//Preenche a celula com as reservas recebidas no response
+					for (let r of scope.listaDeReservas) {
+						let idxSala = _salas.indexOf(r.sala);
+						for (let h = 0; h < r.horario.length; h++) {
+							_celula[r.horario[h]][idxSala] = r.evento;
+						}
+					}
 				},
 					function errorCallback(response) {
 						console.log(response.data);
