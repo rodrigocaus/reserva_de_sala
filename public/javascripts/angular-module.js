@@ -135,6 +135,19 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 
 	$scope.resposta = '';
 
+	$scope.mostraResposta = function (str) {
+
+		$mdDialog.show(
+			$mdDialog.alert()
+			  .parent(angular.element(document.querySelector('#popupContainer')))
+			  .clickOutsideToClose(true)
+			  .title('')
+			  .textContent(str)
+			  .ariaLabel('Resposta do servidor')
+			  .ok('Ok')
+		  );
+	};
+
 	$scope.myDate = new Date();
 
 	$scope.reserva = {
@@ -151,7 +164,7 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 		let diastr = $scope.myDate.getDate() + '/' + ($scope.myDate.getMonth() + 1) + '/' + $scope.myDate.getFullYear();
 		$scope.resposta = '';
 		$scope.pegaReservasDia(diastr);
-		//$scope.resposta = JSON.stringify($scope.listaDeReservas);
+		//$scope.* = JSON.stringify($scope.listaDeReservas);
 	}
 	//!($scope.cadastro.matricula) || $scope.cadastro.matricula.trim().length === 0 
 	$scope.toggle = function (sala, hora, ev) {
@@ -208,17 +221,21 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 					function errorCallback(response) {
 						console.log(response.data);
 						if (response.status == 401) {
-							$scope.resposta = "Não autorizado";
+							$scope.mostraResposta("Não autorizado");
+							//$scope.resposta = "Não autorizado";
 							$window.location.href = '/login.html';
 						}
 						else if (response.status == 403) {
-							$scope.resposta = "Não é permitido cancelar reservas de terceiros";
+							$scope.mostraResposta("Não é permitido cancelar reservas de terceiros");
+							//$scope.resposta = "Não é permitido cancelar reservas de terceiros";
 						}
 						else if (response.status == 404) {
-							$scope.resposta = "Reserva não encontrada";
+							$scope.mostraResposta("Reserva não encontrada");
+							//$scope.resposta = "Reserva não encontrada";
 						}
 						else {
-							$scope.resposta = "Falha de acesso";
+							$scope.mostraResposta("Falha de acesso");
+							//$scope.resposta = "Falha de acesso";
 						}
 					});
 
@@ -261,14 +278,17 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 					function errorCallback(response) {
 						console.log(response.data);
 						if (response.status == 401) {
-							$scope.resposta = "Não autorizado";
+							$scope.mostraResposta("Não autorizado");
+							//$scope.resposta = "Não autorizado";
 							$window.location.href = '/login.html';
 						}
 						else if (response.status == 409) {
-							$scope.resposta = "Horário já reservado";
+							$scope.mostraResposta("Horário já reservado");
+							//$scope.resposta = "Horário já reservado";
 						}
 						else {
-							$scope.resposta = "Falha de acesso";
+							$scope.mostraResposta("Falha de acesso");
+							//$scope.resposta = "Falha de acesso";
 						}
 					});
 
@@ -399,11 +419,13 @@ ng_module.directive('myTable', function ($window, $http) {
 					function errorCallback(response) {
 						console.log(response.data);
 						if (response.status == 401) {
-							scope.resposta = "Não autorizado";
+							$scope.mostraResposta("Não autorizado");
+							//scope.resposta = "Não autorizado";
 							$window.location.href = '/login.html';
 						}
 						else {
-							scope.resultado = "Falha de acesso";
+							$scope.mostraResposta("Falha de acesso");
+							//$scope.resposta = "Falha de acesso";
 						}
 						return;
 					});
