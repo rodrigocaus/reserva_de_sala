@@ -90,13 +90,12 @@ router.route('/reservas')   // operacoes sobre todas as reservas
 			if (erro) res.status(500).send("Falha no servidor");
 			else {
 				res.status(200).send(data);
-				//console.log(data);
 			}
 		});
 
 	}
 	)
-	.post(function (req, res) {   // POST (cria)
+	.post(function (req, res) {   // POST (cria reserva)
 
 		//Verifica autenticacao
 		var usuarioSolicitante = checkAuth(req, res);

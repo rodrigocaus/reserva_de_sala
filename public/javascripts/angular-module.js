@@ -33,7 +33,6 @@ ng_module.controller('authenticationCtrl', function ($scope, $http, $window) {
 			"data": data
 		});
 		request.then(function successCallback(response) {
-			console.log(response.data);
 			$scope.resultado = "Sucesso na autenticação!"
 			$window.location.href = '/index.html';
 		},
@@ -88,7 +87,6 @@ ng_module.controller('authenticationCtrl', function ($scope, $http, $window) {
 			"data": data
 		});
 		request.then(function successCallback(response) {
-			console.log(response.data);
 			$window.location.href = '/login.html';
 		},
 			function errorCallback(response) {
@@ -120,7 +118,6 @@ ng_module.controller('authenticationCtrl', function ($scope, $http, $window) {
 			"data": ''
 		});
 		request.then(function successCallback(response) {
-			console.log(response.data);
 			$window.location.href = '/login.html';
 		},
 			function errorCallback(response) {
@@ -164,9 +161,8 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 		let diastr = $scope.myDate.getDate() + '/' + ($scope.myDate.getMonth() + 1) + '/' + $scope.myDate.getFullYear();
 		$scope.resposta = '';
 		$scope.pegaReservasDia(diastr);
-		//$scope.* = JSON.stringify($scope.listaDeReservas);
 	}
-	//!($scope.cadastro.matricula) || $scope.cadastro.matricula.trim().length === 0 
+
 	$scope.toggle = function (sala, hora, ev) {
 		if (!($scope.celula[hora][sala]) || $scope.celula[hora][sala].trim().length === 0) {
 			$scope.mostraFormReserva(sala, hora, ev);
@@ -174,7 +170,6 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 		else {
 			$scope.mostraInfoReserva(sala, hora, ev);
 		}
-		// TODO Chamar a função que exibe mais informações da reserva e possibilitita a reserva/alteração/cancelamento
 	}
 
 	$scope.mostraInfoReserva = function (sala, hora, ev) {
@@ -214,7 +209,6 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 					"url": url,
 				});
 				request.then(function successCallback(response) {
-					console.log(response.data);
 					$scope.resultado = "Reserva cancelada com sucesso!";
 					$window.location.reload(true);
 				},
@@ -271,7 +265,6 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 					"data": data
 				});
 				request.then(function successCallback(response) {
-					console.log(response.data);
 					$scope.resultado = "Reserva efetuada com sucesso!";
 					$window.location.reload(true);
 				},
