@@ -1,5 +1,8 @@
 var ng_module = angular.module('reservasApp', ['ngMaterial', 'ngMessages']);
 
+
+/*************	CONTROLLER RESPONSÁVEL PELO RECURSO DE AUTENTICAÇÃO (LOGIN, CADASTRO,...)	 *************/
+
 ng_module.controller('authenticationCtrl', function ($scope, $http, $window) {
 
 	$scope.user = {
@@ -18,6 +21,7 @@ ng_module.controller('authenticationCtrl', function ($scope, $http, $window) {
 
 	$scope.fazLogin = function () {
 
+		// Verifica se os campos estão todos preenchidos
 		if (!($scope.user.matricula) || $scope.user.matricula.trim().length === 0 ||
 			!($scope.user.senha) || $scope.user.senha.trim().length === 0) {
 			$scope.resultado = "Todos os campos são obrigatórios";
@@ -25,6 +29,7 @@ ng_module.controller('authenticationCtrl', function ($scope, $http, $window) {
 			return;
 		}
 
+		// Requisição HTTP POST para fazer login
 		var url = '/login';
 		var data = { "matricula": $scope.user.matricula, "senha": $scope.user.senha };
 		var request = $http({
@@ -53,8 +58,11 @@ ng_module.controller('authenticationCtrl', function ($scope, $http, $window) {
 		$window.location.href = '/cadastro.html';
 	}
 
+
 	$scope.fazCadastro = function () {
 
+
+		// Verifica se os campos estão todos preenchidos
 		if (!($scope.cadastro.matricula) || $scope.cadastro.matricula.trim().length === 0 ||
 			!($scope.cadastro.nome) || $scope.cadastro.nome.trim().length === 0 ||
 			!($scope.cadastro.senha) || $scope.cadastro.senha.trim().length === 0 ||
@@ -67,6 +75,7 @@ ng_module.controller('authenticationCtrl', function ($scope, $http, $window) {
 			return;
 		}
 
+		// Verifica se a senha foi digitada corretamente
 		if ($scope.cadastro.senha !== $scope.cadastro.senhaconfirma) {
 			$scope.resultado = "As senhas não conferem";
 			$scope.cadastro.senha = '';
@@ -75,6 +84,7 @@ ng_module.controller('authenticationCtrl', function ($scope, $http, $window) {
 			return;
 		}
 
+		// Requisição HTTP PUT para criar um novo cadastro
 		var url = '/login';
 		var data = {
 			"nome": $scope.cadastro.nome,
@@ -111,6 +121,8 @@ ng_module.controller('authenticationCtrl', function ($scope, $http, $window) {
 	}
 
 	$scope.fazLogout = function () {
+
+		// Faz requisição HTTP DELETE para apagar o cookie de autenticação
 		var url = '/login';
 		var request = $http({
 			"method": "delete",
@@ -128,21 +140,24 @@ ng_module.controller('authenticationCtrl', function ($scope, $http, $window) {
 
 });
 
+/*************	CONTROLLER RESPONSÁVEL PELO RECURSO DE RESERVAS (EXIBE, CRIA, CANCELA, ALTERA,...)	 *************/
+
 ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 
 	$scope.resposta = '';
 
+	// Exibe o dialog de mensagens do servidor
 	$scope.mostraResposta = function (str) {
 
 		$mdDialog.show(
 			$mdDialog.alert()
-			  .parent(angular.element(document.querySelector('#popupContainer')))
-			  .clickOutsideToClose(true)
-			  .title('')
-			  .textContent(str)
-			  .ariaLabel('Resposta do servidor')
-			  .ok('Ok')
-		  );
+				.parent(angular.element(document.querySelector('#popupContainer')))
+				.clickOutsideToClose(true)
+				.title('')
+				.textContent(str)
+				.ariaLabel('Resposta do servidor')
+				.ok('Ok')
+		);
 	};
 
 	$scope.myDate = new Date();
@@ -157,12 +172,14 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 		fim: 0
 	};
 
+	// Pega as reservas do dia conforme o calendário
 	$scope.confirmaDia = function () {
 		let diastr = $scope.myDate.getDate() + '/' + ($scope.myDate.getMonth() + 1) + '/' + $scope.myDate.getFullYear();
 		$scope.resposta = '';
 		$scope.pegaReservasDia(diastr);
 	}
 
+	// Exibe um formulário de reserva de sala ou informações da reserva dependendo do horário preenchido ou não
 	$scope.toggle = function (sala, hora, ev) {
 		if (!($scope.celula[hora][sala]) || $scope.celula[hora][sala].trim().length === 0) {
 			$scope.mostraFormReserva(sala, hora, ev);
@@ -174,6 +191,8 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 
 	$scope.mostraInfoReserva = function (sala, hora, ev) {
 
+		// Procura na lista de reservas (obtida no GET) qual é a reserva clicada,
+		// para os mesmos sala e horário
 		var reservaClicada;
 		for (let r of $scope.listaDeReservas) {
 			if (r.sala == $scope.salas[sala]) {
@@ -186,12 +205,14 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 			}
 		}
 
+		// Campos a serem exibidos no dialog
 		$scope.reserva.evento = reservaClicada.evento;
 		$scope.reserva.descricao = reservaClicada.descricao;
 		$scope.reserva.inicio = reservaClicada.horario[0];
 		$scope.reserva.fim = reservaClicada.horario[reservaClicada.horario.length - 1] + 1;
 		$scope.reserva.autor = reservaClicada.autor;
 
+		// Exibição do dialog de informação de reserva
 		$mdDialog.show({
 			controller: InfoController,
 			templateUrl: 'info-reserva.tpl.html',
@@ -204,6 +225,7 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 
 				var url = '/reservas/' + reservaClicada._id;
 
+				// Requisição HTTP DELETE no ID da reserva para cancelar a reserva
 				var request = $http({
 					"method": "delete",
 					"url": url,
@@ -244,9 +266,13 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 	};
 
 	$scope.mostraFormReserva = function (sala, hora, ev) {
+
+		// Parâmetros iniciais para se reservar a sala
 		$scope.reserva.inicio = hora;
 		$scope.reserva.sala = $scope.salas[sala];
 		$scope.reserva.dia = $scope.myDate.getDate() + '/' + ($scope.myDate.getMonth() + 1) + '/' + $scope.myDate.getFullYear();
+
+		// Exibição do dialog de formulário de reserva
 		$mdDialog.show({
 			controller: FormController,
 			templateUrl: 'form-reserva.tpl.html',
@@ -259,6 +285,7 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 				var data = JSON.stringify($scope.reserva);
 				var url = '/reservas';
 
+				// Requisição HTTP POST nas reservas para inserir a reserva
 				var request = $http({
 					"method": "post",
 					"url": url,
@@ -290,6 +317,7 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 			});
 	};
 
+	// Controller interno do dialog de formulário de reserva
 	function FormController(scope, $mdDialog) {
 		scope.evento = '';
 		scope.descricao = '';
@@ -306,6 +334,8 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 		};
 
 		scope.reservar = function () {
+
+			// Confere se os campos estão todos preenchidos
 			if (!(scope.evento) || scope.evento.trim().length === 0 ||
 				!(scope.descricao) || scope.descricao.trim().length === 0) {
 				scope.evento = "";
@@ -321,6 +351,7 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 			}
 		};
 
+		// Retorna um array iterável de begin até end (inclusivo) variando de step
 		scope.range = function (begin, end, step) {
 			var array = [];
 			for (var i = begin; i <= end; i += step) {
@@ -330,6 +361,7 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 		};
 	}
 
+	// Controller interno do dialog de informação de reserva
 	function InfoController(scope, $mdDialog) {
 		scope.evento = $scope.reserva.evento;
 		scope.descricao = $scope.reserva.descricao;
@@ -351,6 +383,8 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 	}
 });
 
+/*************	CONFIG RESPONSÁVEL PELO FORMATO DE EXIBIÇÃO DE DATA NO CALENDÁRIO	 *************/
+
 ng_module.config(function ($mdDateLocaleProvider) {
 
 	$mdDateLocaleProvider.formatDate = function (date) {
@@ -359,18 +393,23 @@ ng_module.config(function ($mdDateLocaleProvider) {
 
 });
 
+/*************	DIRETIVA RESPONSÁVEL PELA CONSTRUÇÃO DOS ELEMENTOS QUE COMPÕEM A TABELA	*************/
+
 ng_module.directive('myTable', function ($window, $http) {
 	return {
 		restrict: 'A',
 		templateUrl: 'tabela-reservas.tpl.html',
 		link: function (scope, element, attributes) {
+
 			var _salas = ['FE01', 'FE02', 'FE03', 'FE11', 'FE12', 'FE13'];
 
+			// Construção das células da tabela
 			var _celula = new Array(24);
 			for (let i = 0; i < 24; i++) {
 				_celula[i] = new Array(_salas.length).fill('');
 			}
 
+			// Retorna um array iterável de begin até end (inclusivo) variando de step
 			function _range(begin, end, step) {
 				var array = [];
 
@@ -380,6 +419,7 @@ ng_module.directive('myTable', function ($window, $http) {
 				return array;
 			}
 
+			// Preenche as células da tabela conforme as reservas do dia
 			function _pegaReservasDia(diaStr) {
 				var url = '/reservas';
 
@@ -389,18 +429,19 @@ ng_module.directive('myTable', function ($window, $http) {
 					}
 				};
 
+				// Requisição HTTP GET nas reservas para ver as reservas do dia (DD/MM/YYYY)
 				var request = $http.get(url, config);
 
 				request.then(function successCallback(response) {
 					scope.listaDeReservas = [...response.data];
-					//Limpa as celulas
+					// Limpa as celulas
 					for (let i = 0; i < 24; i++) {
 						for (let j = 0; j < _salas.length; j++) {
 							_celula[i][j] = "";
 						}
 					}
 
-					//Preenche a celula com as reservas recebidas no response
+					// Preenche a celula com as reservas recebidas no response
 					for (let r of scope.listaDeReservas) {
 						let idxSala = _salas.indexOf(r.sala);
 						for (let h = 0; h < r.horario.length; h++) {
@@ -426,6 +467,7 @@ ng_module.directive('myTable', function ($window, $http) {
 
 
 			function _init() {
+				// Torna essas variáveis visíveis no escopo do controller indexCtrl
 				scope.range = _range;
 				scope.salas = _salas;
 				scope.celula = _celula;
