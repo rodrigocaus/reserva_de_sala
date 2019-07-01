@@ -13,18 +13,14 @@ var app = express();
 // serve static files
 app.use('/', express.static(__dirname + '/'));
 
-// uncomment after placing your favicon in /public
-// app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ "extended": false }));
 app.use(cookieParser());
 
-// adicione as duas linhas abaixo
 var router = express.Router();
-app.use('/', router);   // deve vir depois de app.use(bodyParser...
+app.use('/', router); 
 app.use(express.static(path.join(__dirname, 'public')));
-
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
@@ -49,13 +45,11 @@ module.exports = app;
 // codigo abaixo adicionado para o processamento das requisições
 // HTTP GET, POST, PUT, DELETE
 
+//Verifica o cookie do usuario para fins de autenticação, retornando sua matricula e status de admin caso exista
 function checkAuth(req, res) {
 	cookies = req.cookies;
 	if (!cookies || !cookies.userAuth) return 'unauthorized';
 	var content = JSON.parse(cookies.userAuth);
-	// console cookie info
-	//console.log(JSON.stringify(content));
-
 	var key = content.key;
 	var user = { "matricula": content.matricula, "admin": content.admin }
 	if (key == 'secret') return user;
@@ -66,6 +60,7 @@ function checkAuth(req, res) {
 router.route('/')
 	.get(function (req, res) {  // GET
 		res.header('Cache-Control', 'no-cache');
+		//Abre index.html se há autenticação. Se não estiver autenticado, redireciona para a pagina de login
 		if (checkAuth(req, res) == 'unauthorized') {
 			res.sendFile('public/login.html', { "root": "./" });
 		}
@@ -106,6 +101,7 @@ router.route('/reservas')   // operacoes sobre todas as reservas
 
 		var query = { "dia": req.body.dia, "sala": req.body.sala };
 
+		//Vetor com todos os horarios em que o evento ocupa
 		var horariosSelecionados = [];
 		for (let i = req.body.inicio; i < req.body.fim; i++) {
 			horariosSelecionados.push(i);
@@ -114,7 +110,7 @@ router.route('/reservas')   // operacoes sobre todas as reservas
 		mongoReservas.find(query, function (erro, data) {
 			if (erro) res.status(500).send("Falha no servidor");
 			else {
-				//Verifica conflito
+				//Verifica conflito de horarios
 				for (var reserva = 0; reserva < data.length; reserva++) {
 					for (var hora = 0; hora < data[reserva].horario.length; hora++) {
 						if (horariosSelecionados.includes(data[reserva].horario[hora]) === true) {
@@ -162,6 +158,7 @@ router.route('/reservas/:id')   // operacoes sobre uma reserva (ID)
 		mongoReservas.findOne(query, function(erro, data) {
 			if (erro) res.status(500).send("Falha no servidor");
 			else if (data == null) res.status(404).send("Nao encontrado");
+			//Precisa de status de admin para deletar reservas de terceiros
 			else if (data.autor !== usuarioSolicitante.matricula && usuarioSolicitante.admin == false) res.status(403).send("Nao autorizado");
 			else {
 				mongoReservas.deleteOne(query, function(erro){
