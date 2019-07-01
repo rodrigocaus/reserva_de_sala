@@ -168,6 +168,7 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 		autor: '',
 		dia: '',
 		sala: '',
+		id: '',
 		inicio: 0,
 		fim: 0
 	};
@@ -211,6 +212,9 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 		$scope.reserva.inicio = reservaClicada.horario[0];
 		$scope.reserva.fim = reservaClicada.horario[reservaClicada.horario.length - 1] + 1;
 		$scope.reserva.autor = reservaClicada.autor;
+		$scope.reserva.sala = reservaClicada.sala;
+		$scope.reserva.dia = reservaClicada.dia;
+		$scope.reserva.id = reservaClicada._id;
 
 		// Exibição do dialog de informação de reserva
 		$mdDialog.show({
@@ -220,50 +224,78 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 			targetEvent: ev,
 			clickOutsideToClose: true,
 			fullscreen: $scope.customFullscreen // Only for -xs, -sm breakpoints.
-		})
-			.then(function () {
-
-				var url = '/reservas/' + reservaClicada._id;
-
-				// Requisição HTTP DELETE no ID da reserva para cancelar a reserva
-				var request = $http({
-					"method": "delete",
-					"url": url,
-				});
-				request.then(function successCallback(response) {
-					$scope.resultado = "Reserva cancelada com sucesso!";
-					$window.location.reload(true);
-				},
-					function errorCallback(response) {
-						console.log(response.data);
-						if (response.status == 401) {
-							$scope.mostraResposta("Não autorizado");
-							//$scope.resposta = "Não autorizado";
-							$window.location.href = '/login.html';
-						}
-						else if (response.status == 403) {
-							$scope.mostraResposta("Não é permitido cancelar reservas de terceiros");
-							//$scope.resposta = "Não é permitido cancelar reservas de terceiros";
-						}
-						else if (response.status == 404) {
-							$scope.mostraResposta("Reserva não encontrada");
-							//$scope.resposta = "Reserva não encontrada";
-						}
-						else {
-							$scope.mostraResposta("Falha de acesso");
-							//$scope.resposta = "Falha de acesso";
-						}
-					});
-
-			}, function () {
-				$scope.resposta = '';
-				$scope.reserva.evento = '';
-				$scope.reserva.descricao = '';
-				$scope.reserva.inicio = 0;
-				$scope.reserva.fim = 0;
-				$scope.reserva.autor = '';
-			});
+		});
 	};
+
+	// Controller interno do dialog de informação de reserva
+	function InfoController(scope, $mdDialog) {
+
+		scope.evento = $scope.reserva.evento;
+		scope.descricao = $scope.reserva.descricao;
+		scope.inicio = $scope.reserva.inicio;
+		scope.fim = $scope.reserva.fim;
+		scope.autor = $scope.reserva.autor;
+
+		scope.hide = function () {
+			$mdDialog.hide();
+		};
+
+		scope.cancel = function () {
+			$mdDialog.cancel();
+		};
+
+		scope.deletar = function () {
+
+			var url = '/reservas/' + $scope.reserva.id;
+
+			// Requisição HTTP DELETE no ID da reserva para cancelar a reserva
+			var request = $http({
+				"method": "delete",
+				"url": url,
+			});
+			request.then(function successCallback(response) {
+				$scope.resultado = "Reserva cancelada com sucesso!";
+				$window.location.reload(true);
+			},
+				function errorCallback(response) {
+					console.log(response.data);
+					if (response.status == 401) {
+						$scope.mostraResposta("Não autorizado");
+						//$scope.resposta = "Não autorizado";
+						$window.location.href = '/login.html';
+					}
+					else if (response.status == 403) {
+						$scope.mostraResposta("Não é permitido cancelar reservas de terceiros");
+						//$scope.resposta = "Não é permitido cancelar reservas de terceiros";
+					}
+					else if (response.status == 404) {
+						$scope.mostraResposta("Reserva não encontrada");
+						//$scope.resposta = "Reserva não encontrada";
+					}
+					else {
+						$scope.mostraResposta("Falha de acesso");
+						//$scope.resposta = "Falha de acesso";
+					}
+				});
+
+			$mdDialog.hide();
+
+			$scope.resposta = '';
+			$scope.reserva.evento = '';
+			$scope.reserva.descricao = '';
+			$scope.reserva.inicio = 0;
+			$scope.reserva.fim = 0;
+			$scope.reserva.autor = '';
+			$scope.reserva.sala = '';
+			$scope.reserva.dia = '';
+			$scope.reserva.id = '';
+		};
+
+		scope.alterar = function () {
+			$mdDialog.hide();
+			$scope.mostraAlteraReserva();
+		};
+	}
 
 	$scope.mostraFormReserva = function (sala, hora, ev) {
 
@@ -323,7 +355,7 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 		scope.descricao = '';
 		scope.inicio = $scope.reserva.inicio;
 		scope.fim = scope.inicio + 1;
-		//scope.resultado = "";
+		scope.resultado = "";
 
 		scope.hide = function () {
 			$mdDialog.hide();
@@ -361,13 +393,27 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 		};
 	}
 
-	// Controller interno do dialog de informação de reserva
-	function InfoController(scope, $mdDialog) {
+	$scope.mostraAlteraReserva = function () {
+
+		// Exibição do dialog de formulário de reserva
+		$mdDialog.show({
+			controller: AlteraController,
+			templateUrl: 'form-altera-reserva.tpl.html',
+			parent: angular.element(document.body),
+			clickOutsideToClose: true,
+			fullscreen: $scope.customFullscreen, // Only for -xs, -sm breakpoints.
+		})
+			.then(function () {
+				$scope.resposta = '';
+			});
+	};
+
+	function AlteraController(scope, $mdDialog) {
+
 		scope.evento = $scope.reserva.evento;
 		scope.descricao = $scope.reserva.descricao;
 		scope.inicio = $scope.reserva.inicio;
 		scope.fim = $scope.reserva.fim;
-		scope.autor = $scope.reserva.autor;
 
 		scope.hide = function () {
 			$mdDialog.hide();
@@ -377,10 +423,59 @@ ng_module.controller('indexCtrl', function ($scope, $http, $mdDialog, $window) {
 			$mdDialog.cancel();
 		};
 
-		scope.deletar = function () {
-			$mdDialog.hide();
+		scope.alterar = function () {
+
+			// Confere se os campos estão todos preenchidos
+			if (!(scope.evento) || scope.evento.trim().length === 0 ||
+				!(scope.descricao) || scope.descricao.trim().length === 0) {
+				scope.resultado = "Todos os campos são obrigatórios!";
+				return;
+			}
+			else {
+				$scope.reserva.evento = scope.evento;
+				$scope.reserva.descricao = scope.descricao;
+				scope.resultado = "";
+				$mdDialog.hide();
+			}
+
+			var data = JSON.stringify($scope.reserva);
+			var url = '/reservas/' + $scope.reserva.id;
+
+			// Requisição HTTP PUT nas reservas para alterar a reserva
+			var request = $http({
+				"method": "put",
+				"url": url,
+				"data": data
+			});
+
+			request.then(function successCallback(response) {
+				$scope.resultado = "Reserva alterada com sucesso!";
+				$window.location.reload(true);
+			},
+				function errorCallback(response) {
+					console.log(response.data);
+					if (response.status == 401) {
+						$scope.mostraResposta("Não autorizado");
+						//$scope.resposta = "Não autorizado";
+						$window.location.href = '/login.html';
+					}
+					else if (response.status == 403) {
+						$scope.mostraResposta("Não é permitido alterar reservas de terceiros");
+						//$scope.resposta = "Não é permitido cancelar reservas de terceiros";
+					}
+					else if (response.status == 404) {
+						$scope.mostraResposta("Reserva não encontrada");
+						//$scope.resposta = "Reserva não encontrada";
+					}
+					else {
+						$scope.mostraResposta("Falha de acesso");
+						//$scope.resposta = "Falha de acesso";
+					}
+				});
+
 		};
-	}
+	};
+
 });
 
 /*************	CONFIG RESPONSÁVEL PELO FORMATO DE EXIBIÇÃO DE DATA NO CALENDÁRIO	 *************/
@@ -453,12 +548,12 @@ ng_module.directive('myTable', function ($window, $http) {
 					function errorCallback(response) {
 						console.log(response.data);
 						if (response.status == 401) {
-							$scope.mostraResposta("Não autorizado");
-							//scope.resposta = "Não autorizado";
+							//scope.mostraResposta("Não autorizado");
+							//$scope.resposta = "Não autorizado";
 							$window.location.href = '/login.html';
 						}
 						else {
-							$scope.mostraResposta("Falha de acesso");
+							scope.mostraResposta("Falha de acesso");
 							//$scope.resposta = "Falha de acesso";
 						}
 						return;
