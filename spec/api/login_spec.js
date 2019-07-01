@@ -4,7 +4,7 @@ var frisby = require('frisby');
 frisby.globalSetup({
 	request: {
 		headers: {
-			'Cookie': 'userAuth={"key": "secret", "matricula": "matricula", "admin": "admin"}',
+			'Cookie': 'userAuth={"key": "secret", "matricula": "matricula", "admin": false}',
 		}
 	}
 })
@@ -38,8 +38,8 @@ describe('test suite', function () {
 
 	it('testa a cadastro de aluno', function (t3) {
 		frisby.put('http://localhost:3000/login', {
-			nome: "ceara",
-			matricula: "741844",
+			nome: "Thales",
+			matricula: "741845",
 			senha: "753951",
 			senhaconfirma: "753951"
 		})
@@ -51,7 +51,7 @@ describe('test suite', function () {
 
 	it('testa a cadastro de aluno repetido', function (t4) {
 		frisby.put('http://localhost:3000/login', {
-			nome: "ceara",
+			nome: "Thales",
 			matricula: "741852",
 			senha: "753951",
 			senhaconfirma: "753951"
@@ -69,48 +69,41 @@ describe('test suite', function () {
 			.done(t5);
 	});
 
-	/*
-	it('testa o metodo get com RA', function(t6) {
-	frisby.get('http://localhost:3000/alunos/555555')
-	  .expect('status', 200)
-	  .expect('header', 'Content-Type', new RegExp('[application/json].*'))
-	  .expect('jsonTypes', {alunos: Joi.array().min(1).max(1).items({
-				 ra: Joi.string().required(),
-				 nome: Joi.string().required(),
-				 curso: Joi.string().required()
-				 })})
-	  .done(t6);
+	it('testa efetuar a reserva com sucesso', function (t6) {
+		frisby.post('http://localhost:3000/reservas', {
+			sala: "FE03",
+			autor: "158445",
+			dia: "04/07/2019",
+			evento: "Aula de bale",
+			descricao: "Aula de bale classico",
+			inicio: 8,
+			fim: 10
+		})
+			.expect('status', 200)
+			.expect('bodyContains', 'Reserva inserida')
+			.done(t6);
 	});
-  
-	it('testa o metodo put para alterar um aluno', function(t7) {
-	frisby.put('http://localhost:3000/alunos/555555', {
-	  ra: "555555",
-	  nome: 'Isaac Newton',
-	  curso: 'Engenharia'})
-	 .expect('status', 200)
-	 .expect('json', {resultado:"aluno atualizado"}) 
-	 .done(t7);
+
+	it('testa efetuar a reserva com conflito', function (t7) {
+		frisby.post('http://localhost:3000/reservas', {
+			sala: "FE03",
+			autor: "158445",
+			dia: "04/07/2019",
+			evento: "Aula de canto",
+			descricao: "Canto moderno",
+			inicio: 8,
+			fim: 12
+		})
+			.expect('status', 409)
+			.expect('bodyContains', 'Horario ja reservado')
+			.done(t7);
 	});
-  
-   it('testa o metodo delete para remover um aluno', function(t8) {
-	frisby.delete('http://localhost:3000/alunos/555555')
-	 .expect('status', 200)
-	 .expect('json', {resultado:"aluno removido"}) 
-	 .done(t8);
+
+	//id para esse teste eh necessario ser obtido manualmente
+	it('testa cancelar a propria reserva com sucesso', function (t8) {
+		frisby.delete('http://localhost:3000/reservas/5d15307890c361008f260b12')
+			.expect('status', 200)
+			.expect('bodyContains', 'Removido com sucesso')
+			.done(t8);
 	});
-  
-   it('testa roteamento invalido', function(t9) {
-	frisby.get('http://localhost:3000/alunos/555555/nome')
-	 .expect('status', 404) 
-	 .done(t9);
-	});
-  
-   it('testa logout', function(t10) {
-	frisby.delete('http://localhost:3000/authentication')
-	 .expect('status', 200)
-	 .expect('header', 'Set-Cookie', new RegExp('[userAuth].*'))
-	 .expect('bodyContains', 'Sucesso') 
-	 .done(t10);
-	});
-	*/
 });
