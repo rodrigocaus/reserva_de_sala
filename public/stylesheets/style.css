@@ -1,6 +1,6 @@
 body {
   padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+  font: 14px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif !important;
   background-color: rgb(235, 235, 235);
 }
 

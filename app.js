@@ -19,7 +19,7 @@ app.use(bodyParser.urlencoded({ "extended": false }));
 app.use(cookieParser());
 
 var router = express.Router();
-app.use('/', router); 
+app.use('/', router);
 app.use(express.static(path.join(__dirname, 'public')));
 
 // catch 404 and forward to error handler
@@ -143,6 +143,34 @@ router.route('/reservas')   // operacoes sobre todas as reservas
 router.route('/reservas/:id')   // operacoes sobre uma reserva (ID)
 	.put(function (req, res) {   // PUT (altera reserva)
 
+		//Verifica autenticacao
+		var usuarioSolicitante = checkAuth(req, res);
+		if (usuarioSolicitante == 'unauthorized') {
+			res.status(401).send("Nao autorizado");
+			return;
+		}
+
+		var query = { "_id": req.body.id };
+		var alteracao = {
+			$set: {
+				"evento": req.body.evento,
+				"descricao": req.body.descricao
+			}
+		}
+
+		mongoReservas.findOne(query, function (erro, data) {
+			if (erro) res.status(500).send("Falha no servidor");
+			else if (data == null) res.status(404).send("Nao encontrado");
+			//Precisa ser autor para alterar reservas
+			else if (data.autor !== usuarioSolicitante.matricula) res.status(403).send("Nao autorizado");
+			else {
+				mongoReservas.findOneAndUpdate(query, alteracao, function (erro2, data2) {
+					if (erro2) res.status(500).send("Falha no servidor");
+					else if (data2 == null) res.status(404).send("Nao encontrado");
+					else res.status(200).send("Alterado com sucesso");
+				});
+			}
+		});
 	}
 	)
 	.delete(function (req, res) {   // DELETE (remove reserva)
@@ -154,14 +182,14 @@ router.route('/reservas/:id')   // operacoes sobre uma reserva (ID)
 			return;
 		}
 
-		var query = {"_id": req.params.id};
-		mongoReservas.findOne(query, function(erro, data) {
+		var query = { "_id": req.params.id };
+		mongoReservas.findOne(query, function (erro, data) {
 			if (erro) res.status(500).send("Falha no servidor");
 			else if (data == null) res.status(404).send("Nao encontrado");
 			//Precisa de status de admin para deletar reservas de terceiros
 			else if (data.autor !== usuarioSolicitante.matricula && usuarioSolicitante.admin == false) res.status(403).send("Nao autorizado");
 			else {
-				mongoReservas.deleteOne(query, function(erro){
+				mongoReservas.deleteOne(query, function (erro) {
 					if (erro) res.status(500).send("Falha no servidor");
 					else res.status(200).send("Removido com sucesso");
 				});
