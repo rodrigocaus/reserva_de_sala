@@ -45,9 +45,16 @@ describe('test suite', function () {
 
 	//id para esse teste eh necessario ser obtido manualmente
 	it('testa cancelar a propria reserva com sucesso', function (t3) {
-		frisby.delete('http://localhost:3000/reservas/5d15307890c361008f260b12')
+		frisby.delete('http://localhost:3000/reservas/5d1a82e4f9657b032ab5bfaa')
 			.expect('status', 200)
 			.expect('bodyContains', 'Removido com sucesso')
 			.done(t3);
-	});
+    });
+    
+    it('testa cancelar reserva não existente', function (t4) {
+		frisby.delete('http://localhost:3000/reservas/5d15307890c452998f260b12')
+			.expect('status', 404)
+			.expect('bodyContains', 'Nao encontrado')
+			.done(t4);
+    });
 });

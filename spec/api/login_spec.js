@@ -13,7 +13,7 @@ const Joi = frisby.Joi; // Frisby exposes Joi for convenience
 
 describe('test suite', function () {
 
-	it('testa a cadastro de aluno', function (t1) {
+	it('testa o cadastro de aluno', function (t1) {
 		frisby.put('http://localhost:3000/login', {
 			nome: "Thales",
 			matricula: "158445",
@@ -47,7 +47,7 @@ describe('test suite', function () {
 			.done(t3);
 	});
 
-	it('testa a cadastro de aluno repetido', function (t4) {
+	it('testa o cadastro de aluno repetido', function (t4) {
 		frisby.put('http://localhost:3000/login', {
 			nome: "Thales",
 			matricula: "158445",
