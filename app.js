@@ -150,7 +150,7 @@ router.route('/reservas/:id')   // operacoes sobre uma reserva (ID)
 			return;
 		}
 
-		var query = { "_id": req.body.id };
+		var query = { "_id": req.params.id };
 		var alteracao = {
 			$set: {
 				"evento": req.body.evento,

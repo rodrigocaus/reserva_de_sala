@@ -17,9 +17,9 @@ describe('test suite', function () {
 		frisby.post('http://localhost:3000/reservas', {
 			sala: "FE03",
 			autor: "158445",
-			dia: "04/07/2019",
-			evento: "Aula de bale",
-			descricao: "Aula de bale classico",
+			dia: "4/7/2019",
+			evento: "Aula teste",
+			descricao: "Aula para testar",
 			inicio: 8,
 			fim: 10
 		})
@@ -32,9 +32,9 @@ describe('test suite', function () {
 		frisby.post('http://localhost:3000/reservas', {
 			sala: "FE03",
 			autor: "158445",
-			dia: "04/07/2019",
-			evento: "Aula de canto",
-			descricao: "Canto moderno",
+			dia: "4/7/2019",
+			evento: "Workshop teste",
+			descricao: "Workshop para testar",
 			inicio: 8,
 			fim: 12
 		})
@@ -57,4 +57,28 @@ describe('test suite', function () {
 			.expect('bodyContains', 'Nao encontrado')
 			.done(t4);
     });
+
+    it('testa alterar a reserva com sucesso', function (t5) {
+		frisby.put('http://localhost:3000/reservas/5d1ac762faf44603f7fb2312', {
+			evento: "Testando Aula",
+            descricao: "Aula 2",
+            inicio: 20,
+            fim: 22
+		})
+			.expect('status', 200)
+			.expect('bodyContains', 'Alterado com sucesso')
+			.done(t5);
+    });
+    
+    it('testa alterar uma reserva inexistente', function (t6) {
+		frisby.put('http://localhost:3000/reservas/5d1ac762faf44603f7fb2412', {
+			evento: "Teste aula",
+            descricao: "Aula 3",
+            inicio: 20,
+            fim: 22
+		})
+			.expect('status', 404)
+			.expect('bodyContains', 'Nao encontrado')
+			.done(t6);
+	});
 });
