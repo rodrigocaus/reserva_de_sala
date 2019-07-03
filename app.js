@@ -10,6 +10,7 @@ var mongoUsuarios = require('./models/mongo_usuarios');
 
 var app = express();
 
+
 // serve static files
 app.use('/', express.static(__dirname + '/'));
 
@@ -37,7 +38,7 @@ app.use(function (err, req, res, next) {
 
 	// render the error page
 	res.status(err.status || 500);
-	res.render('error');
+	res.send();
 });
 
 module.exports = app;
