@@ -10,7 +10,6 @@ var mongoUsuarios = require('./models/mongo_usuarios');
 
 var app = express();
 
-
 // serve static files
 app.use('/', express.static(__dirname + '/'));
 
